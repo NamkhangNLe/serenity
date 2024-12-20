@@ -22,7 +22,8 @@
   background-color: #61dafb;
   color: white;
   border-radius: 50%;
-  animation: expand 1s ease-out forwards;
+  text-align: center;
+  animation: expand 0.5s ease-out forwards;
 }
 
 @keyframes expand {
