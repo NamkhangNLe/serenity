@@ -18,7 +18,7 @@ export function truncate(s, n) {
   return str.length > n ? str.slice(0, n - 1) + '…' : str;
 }
 
-const LINK_RE = /\[\[([^\]\[]+)\]\]/g;
+const LINK_RE = /\[\[([^\][]+)\]\]/g;
 
 // Split text into plain segments and [[link]] segments.
 export function parseLinks(text) {
