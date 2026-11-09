@@ -43,30 +43,51 @@ function norm(s) {
   return (s || '').trim().toLowerCase();
 }
 
-// Resolve a [[target]] to a thought: exact title match first, then
-// title-starts-with, then text-starts-with. Returns null when dangling.
+// Resolve a [[target]] to a thought by EXACT title match only
+// (case-insensitive, trimmed). Prefix matching used to silently return
+// the first-created match in array order, which made [[links]]
+// ambiguous with no indication. Returns null when there is no exact
+// match — call findThoughtCandidates for disambiguation options.
 export function findThoughtByTitle(thoughts, target) {
   const t = norm(target);
   if (!t) return null;
-  let hit = thoughts.find((th) => norm(titleOf(th)) === t);
-  if (hit) return hit;
-  hit = thoughts.find((th) => norm(titleOf(th)).startsWith(t));
-  if (hit) return hit;
-  hit = thoughts.find((th) => norm(th.text).startsWith(t));
-  return hit || null;
+  return thoughts.find((th) => norm(titleOf(th)) === t) || null;
+}
+
+// Every thought whose title could be what a [[target]] meant, best
+// matches first: title-starts-with, then title-contains. Used by the
+// disambiguation UI and composer autocomplete — never for silent
+// resolution.
+export function findThoughtCandidates(thoughts, target) {
+  const t = norm(target);
+  if (!t) return [];
+  const starts = [];
+  const contains = [];
+  for (const th of thoughts) {
+    const title = norm(titleOf(th));
+    if (title === t) continue; // exact match is resolved, not a candidate
+    if (title.startsWith(t)) starts.push(th);
+    else if (title.includes(t)) contains.push(th);
+  }
+  return [...starts, ...contains];
 }
 
 // Same as parseLinks, but each link segment also gets the id of the
-// thought it resolves to (null when dangling).
+// thought it resolves to (null when dangling) and, when there is no
+// exact match, the candidate thoughts for disambiguation.
 export function resolveLinks(thoughts, text) {
   return parseLinks(text).map((seg) => {
     if (seg.type !== 'link') return seg;
     const match = findThoughtByTitle(thoughts, seg.target);
-    return { ...seg, id: match ? match.id : null };
+    return {
+      ...seg,
+      id: match ? match.id : null,
+      candidates: match ? [] : findThoughtCandidates(thoughts, seg.target),
+    };
   });
 }
 
-// Every thought that links TO the given thought id.
+// Every thought that links TO the given thought id (exact resolution only).
 export function backlinks(thoughts, thoughtId) {
   return thoughts.filter((th) => {
     if (th.id === thoughtId) return false;
@@ -90,17 +111,18 @@ export function outgoingLinks(thoughts, thought) {
 }
 
 // Example thoughts so the feed and graph are alive on first load.
-// They link to each other, so the graph has edges from the start.
+// Each thought's first line is its exact linkable title, so every
+// [[link]] below resolves exactly — no prefix guessing.
 export function seedThoughts() {
   const now = Date.now();
   const raw = [
-    'The best ideas arrive in the shower, when there is nothing to write them down on [[shower thoughts]]',
-    'shower thoughts: why do we only get good ideas when our hands are busy?',
-    'Build a capture flow so fast the thought never gets a chance to escape [[frictionless capture]]',
-    'frictionless capture is the whole product — one tap, no decisions, no folders',
-    'What if notes linked themselves, and the graph grew on its own? [[graph]]',
-    'graph view should feel like a constellation, not a spreadsheet [[serenity]]',
-    'serenity: drop a thought, watch it find its people',
+    'The best ideas arrive in the shower\nwhen there is nothing to write them down on [[shower thoughts]]',
+    'shower thoughts\nwhy do we only get good ideas when our hands are busy?',
+    'Build a capture flow so fast the thought never escapes\none tap, no decisions, no folders [[frictionless capture]]',
+    'frictionless capture\nthe whole product: one tap, no decisions, no folders',
+    'What if notes linked themselves?\nand the graph grew on its own [[graph]]',
+    'graph\nthe view should feel like a constellation, not a spreadsheet [[serenity]]',
+    'serenity\ndrop a thought, watch your constellation grow. private, local, yours.',
   ];
   return raw.map((text, i) => ({
     id: `seed-${i + 1}`,
@@ -130,4 +152,26 @@ export function saveThoughts(thoughts) {
     // Storage full or unavailable (private mode): the app still works
     // in-memory for this session.
   }
+}
+
+// Validate a parsed JSON import: returns the usable thoughts
+// (fresh ids, original text + timestamp when sane), or null when the
+// payload is not a thought list at all.
+export function validateImportedThoughts(parsed) {
+  if (!Array.isArray(parsed)) return null;
+  const out = [];
+  for (const item of parsed) {
+    if (!item || typeof item.text !== 'string') continue;
+    const text = item.text.trim();
+    if (!text) continue;
+    out.push({
+      id: makeId(),
+      text,
+      createdAt:
+        typeof item.createdAt === 'number' && Number.isFinite(item.createdAt)
+          ? item.createdAt
+          : Date.now(),
+    });
+  }
+  return out;
 }
