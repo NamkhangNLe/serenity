@@ -1,70 +1,41 @@
-# Getting Started with Create React App
+# 🌸 Serenity — drop a thought
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> *Twitter meets Obsidian: drop a random thought in under three seconds,
+> watch it find its people in the graph.*
 
-## Available Scripts
+## What it is
 
-In the project directory, you can run:
+Serenity is a fast capture box for random thoughts. Type a thought, drop it,
+and it shows up in three places at once:
 
-### `npm start`
+- **Feed** — a chronological, Twitter-style list of your thoughts with
+  timestamps.
+- **Bubbles** — the signature view: every thought is a circle, arranged in
+  rings radiating from the center. Click a bubble to open it.
+- **Graph** — an interactive node graph: thoughts are circles, `[[links]]`
+  are lines between them. Drag to pan, zoom, click a node to open it.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Linking (the Obsidian side)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Write `[[double brackets]]` inside any thought to link it to another thought.
+A link matches a thought by its first line. Clicking a resolved link jumps to
+that thought; clicking a dangling link (no matching thought yet) prefills the
+composer so you can create it. Every thought shows its **backlinks**
+("Linked from") — the thoughts that point at it.
 
-### `npm test`
+## Persistence
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Thoughts are saved to `localStorage`, so they survive a refresh. First load
+seeds seven example thoughts (already linked to each other) so the feed and
+graph are alive immediately. Use **Clear all** in the footer to wipe them.
 
-### `npm run build`
+## Run it
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm install
+npm start        # dev server at http://localhost:3000
+npm test         # test suite (composer, links, search)
+npm run build    # production bundle in build/
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Built with Create React App + React 19. No backend, no accounts, no tracking.
